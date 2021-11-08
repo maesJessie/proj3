@@ -1,5 +1,6 @@
 #include <stdlib.h>
 #include <stdio.h>
+#include <string.h>
 #include "buffer.h"
 
 static ring_buffer_421_t buffer;
@@ -35,8 +36,8 @@ long init_buffer_421(void) {
 
 	// Initialize your semaphores here.
 	sem_init(&mutex, 0, 1);
-	sem_init(&fill_count, 0, 1);
-	sem_init(&empty_count, 0, 1);
+	sem_init(&fill_count, 0, SIZE_OF_BUFFER);
+	sem_init(&empty_count, 0, 0);
 
 	return 0;
 }
@@ -47,10 +48,19 @@ long enqueue_buffer_421(char * data) {
 		printf("write_buffer_421(): The buffer does not exist. Aborting.\n");
 		return -1;
 	}
+	//Lock the mutex and decrease the empty_count
+	sem_wait(&mutex);
+	sem_wait(&empty_count);
+	
+	//critical section
 	memcpy(buffer.write->data, data, DATA_LENGTH);
 	// Advance the pointer.
 	buffer.write = buffer.write->next;
 	buffer.length++;
+	
+	//Add to the fill_count and release the mutex
+	sem_post(&fill_count);
+	sem_post(&mutex);
 
 	return 0;
 }
@@ -96,4 +106,8 @@ void print_semaphores(void) {
 	sem_getvalue(&empty_count, &value);
 	printf("sem_t empty_count = %d\n", value);
 	return;
+}
+
+int main(){
+	return 0;
 }
