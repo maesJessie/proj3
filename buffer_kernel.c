@@ -1,0 +1,137 @@
+//Kernel implimentation of buffer_user.c
+#include "buffer.h"
+#include <stdlib.h>
+#include <stdio.h>
+#include <string.h>
+#include <pthread.h>
+#include <semaphore.h>
+#include <linux/kernel.h>
+#include <linux/syscalls.h>
+
+static ring_buffer_421_t buffer;
+static sem_t mutex;
+static sem_t fill_count;
+static sem_t empty_count;
+
+SYSCALL_DEFINE0(init_buffer_421) {
+	// Note: You will need to initialize semaphores in this function.
+	// Ensure we're not initializing a buffer that already exists.
+	if (buffer.read || buffer.write) {
+		printk("init_buffer_421(): Buffer already exists. Aborting.\n");
+		return -1;
+	}
+
+	// Create the root node.
+	node_421_t *node;
+	node = (node_421_t *) kmalloc(sizeof(node_421_t), GFP_KERNEL);
+	// Create the rest of the nodes, linking them all together.
+	node_421_t *current;
+	int i;
+	current = node;
+	// Note that we've already created one node, so i = 1.
+	for (i = 1; i < SIZE_OF_BUFFER; i++) {
+		current->next = (node_421_t *) kmalloc(sizeof(node_421_t), GFP_KERNEL);
+		current = current->next;
+	}
+	// Complete the chain.
+	current->next = node;
+	buffer.read = node;
+	buffer.write = node;
+	buffer.length = 0;
+
+	// Initialize your semaphores here.
+	sem_init(&mutex, 0, 1);
+	sem_init(&fill_count, 0, SIZE_OF_BUFFER);
+	sem_init(&empty_count, 0, 0);
+
+	return 0;
+}
+
+SYSCALL_DEFINE1(enqueue_buffer_421, char *, data) {
+	// NOTE: You have to modify this function to use semaphores.
+	if (!buffer.write) {
+		printk("write_buffer_421(): The buffer does not exist. Aborting.\n");
+		return -1;
+	}
+	//Lock the mutex and decrease the empty_count
+	sem_wait(&mutex);
+	sem_wait(&empty_count);
+	
+	//critical section
+	memcpy(buffer.write->data, data, DATA_LENGTH);
+	// Advance the pointer.
+	buffer.write = buffer.write->next;
+	buffer.length++;
+	
+	//Add to the fill_count and release the mutex
+	sem_post(&fill_count);
+	sem_post(&mutex);
+
+	return 0;
+}
+
+SYSCALL_DEFINE1(dequeue_buffer_421, char *, data) {
+	// NOTE: Implement this function.
+	
+	if(!buffer.read){
+		printk("read_buffer_421(): The buffer does not exist. Aborting.\n")
+		return -1;
+	}
+
+	//Here we lock the mutex and decrease the full count
+	sem_wait(&mutex);
+	sem_wait(&full_count);
+
+	
+	//Here we will Copy 1024 bytes from the read node 
+        //into the provided buffer data.
+	memcpy(buffer.read->data, data, DATA_LENGTH);
+
+	//Advance the pointer
+	buffer.read = buffer.read->next;
+	buffer.legnth--;
+
+	//Add to the empty_count and release the mutex
+	sem_post(&empty_count);
+	sem_post(&mutex);
+	return 0;
+}
+
+SYSCALL_DEFINE0(delete_buffer_421) {
+	// Tip: Don't call this while any process is waiting to enqueue or dequeue.
+	if (!buffer.read) {
+		printk("delete_buffer_421(): The buffer does not exist. Aborting.\n");
+		return -1;
+	}
+	// Get rid of all existing nodes.
+	node_421_t *temp;
+	node_421_t *current = buffer.read->next;
+	while (current != buffer.read) {
+		temp = current->next;
+		kfree(current);
+		current = temp;
+	}
+	// Free the final node.
+	kfree(current);
+	current = NULL;
+	// Reset the buffer.
+	buffer.read = NULL;
+	buffer.write = NULL;
+	buffer.length = 0;
+	return 0;
+}
+
+SYSCALL_DEFINE0(print_semaphores) {
+	// You can call this method to check the status of the semaphores.
+	// Don't forget to initialize them first!
+	// YOU DO NOT NEED TO IMPLEMENT THIS FOR KERNEL SPACE.
+	int value;
+	sem_getvalue(&mutex, &value);
+	printk("sem_t mutex = %d\n", value);
+	sem_getvalue(&fill_count, &value);
+	printk("sem_t fill_count = %d\n", value);
+	sem_getvalue(&empty_count, &value);
+	printk("sem_t empty_count = %d\n", value);
+	return;
+}
+
