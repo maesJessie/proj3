@@ -21,14 +21,14 @@ long init_buffer_421(void) {
 
 	// Create the root node.
 	node_421_t *node;
-	node = (node_421_t *) kmalloc(sizeof(node_421_t));
+	node = (node_421_t *) malloc(sizeof(node_421_t));
 	// Create the rest of the nodes, linking them all together.
 	node_421_t *current;
 	int i;
 	current = node;
 	// Note that we've already created one node, so i = 1.
 	for (i = 1; i < SIZE_OF_BUFFER; i++) {
-		current->next = (node_421_t *) kmalloc(sizeof(node_421_t));
+		current->next = (node_421_t *) malloc(sizeof(node_421_t));
 		current = current->next;
 	}
 	// Complete the chain.
@@ -72,13 +72,13 @@ long dequeue_buffer_421(char * data) {
 	// NOTE: Implement this function.
 	
 	if(!buffer.read){
-		printf("read_buffer_421(): The buffer does not exist. Aborting.\n")
+		printf("read_buffer_421(): The buffer does not exist. Aborting.\n");
 		return -1;
 	}
 
-	//Here we lock the mutex and decrease the full count
+	//Here we lock the mutex and decrease the fill count
 	sem_wait(&mutex);
-	sem_wait(&full_count);
+	sem_wait(&fill_count);
 
 	
 	//Here we will Copy 1024 bytes from the read node 
@@ -87,7 +87,7 @@ long dequeue_buffer_421(char * data) {
 
 	//Advance the pointer
 	buffer.read = buffer.read->next;
-	buffer.legnth--;
+	buffer.length--;
 
 	//Add to the empty_count and release the mutex
 	sem_post(&empty_count);
@@ -106,11 +106,11 @@ long delete_buffer_421(void) {
 	node_421_t *current = buffer.read->next;
 	while (current != buffer.read) {
 		temp = current->next;
-		kfree(current);
+		free(current);
 		current = temp;
 	}
 	// Free the final node.
-	kfree(current);
+	free(current);
 	current = NULL;
 	// Reset the buffer.
 	buffer.read = NULL;
@@ -140,12 +140,11 @@ void producer(void *thread){
 	while(i < SIZE_OF_BUFFER){
 		if(count > 9)
 			count = 0;
-		value = count + '0';
+		value = (char)count;
 		sleep(rand() % 2);
 		enqueue_buffer_421(value);
 		i++;
 		count++;
-		}
 	}
 }
 
@@ -156,7 +155,6 @@ void consumer(void *thread){
 		sleep(rand() % 2);
 		printf(dequeue_buffer_421(value), " ");
 		i++;
-		}
 	}
 }
 
