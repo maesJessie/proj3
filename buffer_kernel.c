@@ -2,6 +2,7 @@
 #include "buffer.h"
 #include <stdlib.h>
 #include <stdio.h>
+#include <unistd.h>
 #include <string.h>
 #include <pthread.h>
 #include <semaphore.h>
@@ -74,13 +75,13 @@ SYSCALL_DEFINE1(dequeue_buffer_421, char *, data) {
 	// NOTE: Implement this function.
 	
 	if(!buffer.read){
-		printk("read_buffer_421(): The buffer does not exist. Aborting.\n")
+		printk("read_buffer_421(): The buffer does not exist. Aborting.\n");
 		return -1;
 	}
 
-	//Here we lock the mutex and decrease the full count
+	//Here we lock the mutex and decrease the fill count
 	down(&mutex);
-	down(&full_count);
+	down(&fill_count);
 
 	
 	//Here we will Copy 1024 bytes from the read node 
@@ -89,7 +90,7 @@ SYSCALL_DEFINE1(dequeue_buffer_421, char *, data) {
 
 	//Advance the pointer
 	buffer.read = buffer.read->next;
-	buffer.legnth--;
+	buffer.length--;
 
 	//Add to the empty_count and release the mutex
 	up(&empty_count);
@@ -104,12 +105,11 @@ SYSCALL_DEFINE1(producer, void *,thread){
 	while(i < SIZE_OF_BUFFER){
 		if(count > 9)
 			count = 0;
-		value = count + '0';
-		sleep(rand() % 0 + 1);
-		enqueue_buffer_421(value);
+		value = (char)count;
+		sleep(rand() % 2);
+		enqueue_buffer_421(&value);
 		i++;
 		count++;
-		}
 	}
 }
 
@@ -117,10 +117,9 @@ SYSCALL_DEFINE1(consumer, void *,thread){
 	int i = 0;
 	char value = '0';
 	while(i < SIZE_OF_BUFFER){
-		sleep(rand() % 0 + 1);
-		printk(dequeue_buffer_421(value), " ");
+		sleep(rand() % 2);
+		printk("%d ", dequeue_buffer_421(&value));
 		i++;
-		}
 	}
 }
 
