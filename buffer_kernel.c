@@ -97,6 +97,34 @@ SYSCALL_DEFINE1(dequeue_buffer_421, char *, data) {
 	return 0;
 }
 
+SYSCALL_DEFINE1(producer, void *,thread){
+	int i = 0;
+	char value = '0';
+	int count = 0;
+	while(i < SIZE_OF_BUFFER){
+		if(count > 9)
+			count = 0;
+		value = count + '0';
+		sleep(rand() % 0 + 1);
+		enqueue_buffer_421(value);
+		i++;
+		count++;
+		}
+	}
+}
+
+SYSCALL_DEFINE1(consumer, void *,thread){
+	int i = 0;
+	char value = '0';
+	while(i < SIZE_OF_BUFFER){
+		sleep(rand() % 0 + 1);
+		printk(dequeue_buffer_421(value), " ");
+		i++;
+		}
+	}
+}
+
+
 SYSCALL_DEFINE0(delete_buffer_421) {
 	// Tip: Don't call this while any process is waiting to enqueue or dequeue.
 	if (!buffer.read) {
