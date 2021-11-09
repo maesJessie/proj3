@@ -1,6 +1,8 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
+#include <pthread.h>
+#include <semaphore.h>
 #include "buffer.h"
 
 static ring_buffer_421_t buffer;
@@ -18,14 +20,14 @@ long init_buffer_421(void) {
 
 	// Create the root node.
 	node_421_t *node;
-	node = (node_421_t *) malloc(sizeof(node_421_t));
+	node = (node_421_t *) kmalloc(sizeof(node_421_t));
 	// Create the rest of the nodes, linking them all together.
 	node_421_t *current;
 	int i;
 	current = node;
 	// Note that we've already created one node, so i = 1.
 	for (i = 1; i < SIZE_OF_BUFFER; i++) {
-		current->next = (node_421_t *) malloc(sizeof(node_421_t));
+		current->next = (node_421_t *) kmalloc(sizeof(node_421_t));
 		current = current->next;
 	}
 	// Complete the chain.
@@ -69,13 +71,13 @@ long dequeue_buffer_421(char * data) {
 	// NOTE: Implement this function.
 	
 	if(!buffer.read){
-		printf("read_buffer_421(): The buffer does not exist. Aborting.\n");
+		printf("read_buffer_421(): The buffer does not exist. Aborting.\n")
 		return -1;
 	}
 
-	//Here we lock the mutex and decrease the fill count
+	//Here we lock the mutex and decrease the full count
 	sem_wait(&mutex);
-	sem_wait(&fill_count);
+	sem_wait(&full_count);
 
 	
 	//Here we will Copy 1024 bytes from the read node 
@@ -84,7 +86,7 @@ long dequeue_buffer_421(char * data) {
 
 	//Advance the pointer
 	buffer.read = buffer.read->next;
-	buffer.length--;
+	buffer.legnth--;
 
 	//Add to the empty_count and release the mutex
 	sem_post(&empty_count);
@@ -103,11 +105,11 @@ long delete_buffer_421(void) {
 	node_421_t *current = buffer.read->next;
 	while (current != buffer.read) {
 		temp = current->next;
-		free(current);
+		kfree(current);
 		current = temp;
 	}
 	// Free the final node.
-	free(current);
+	kfree(current);
 	current = NULL;
 	// Reset the buffer.
 	buffer.read = NULL;
@@ -130,6 +132,27 @@ void print_semaphores(void) {
 	return;
 }
 
+void producer(void *thread){
+	int i = 0;
+	char value = '0';
+	int count = 0;
+	while(i < SIZE_OF_BUFFER){
+		if(count > 9)
+			count = 0;
+		value = count + '0';
+		sleep(rand() % 0 + 1);
+		enqueue_buffer_421(value);
+		i++;
+		count++;
+		}
+	}
+}
+
+void consumer(void *thread){
+}
+
 int main(){
+	init_buffer_421();
+	pthread_t thread[DATA_LENGTH];
 	return 0;
 }
