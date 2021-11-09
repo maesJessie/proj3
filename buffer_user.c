@@ -142,7 +142,7 @@ void producer(void *thread){
 			count = 0;
 		value = (char)count;
 		sleep(rand() % 2);
-		enqueue_buffer_421(value);
+		enqueue_buffer_421(&value);
 		i++;
 		count++;
 	}
@@ -153,7 +153,7 @@ void consumer(void *thread){
 	char value = '0';
 	while(i < SIZE_OF_BUFFER){
 		sleep(rand() % 2);
-		printf(dequeue_buffer_421(value), " ");
+		printf("%d ", dequeue_buffer_421(&value));
 		i++;
 	}
 }
