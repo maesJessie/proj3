@@ -149,6 +149,14 @@ void producer(void *thread){
 }
 
 void consumer(void *thread){
+	int i = 0;
+	char value = '0';
+	while(i < SIZE_OF_BUFFER){
+		sleep(rand() % 0 + 1);
+		printf(dequeue_buffer_421(value), " ");
+		i++;
+		}
+	}
 }
 
 int main(){
