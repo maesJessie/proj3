@@ -141,7 +141,7 @@ void producer(void *thread){
 		if(count > 9)
 			count = 0;
 		value = count + '0';
-		sleep(rand() % 0 + 1);
+		sleep(rand() % 2);
 		enqueue_buffer_421(value);
 		i++;
 		count++;
@@ -153,7 +153,7 @@ void consumer(void *thread){
 	int i = 0;
 	char value = '0';
 	while(i < SIZE_OF_BUFFER){
-		sleep(rand() % 0 + 1);
+		sleep(rand() % 2);
 		printf(dequeue_buffer_421(value), " ");
 		i++;
 		}
