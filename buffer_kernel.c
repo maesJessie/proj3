@@ -40,7 +40,7 @@ SYSCALL_DEFINE0(init_buffer_421) {
 	buffer.length = 0;
 
 	// Initialize your semaphores here.
-	sem_init(&mutex, 0, 1);
+	init_MUTEX(&mutex);
 	sem_init(&fill_count, 0, SIZE_OF_BUFFER);
 	sem_init(&empty_count, 0, 0);
 
@@ -54,8 +54,8 @@ SYSCALL_DEFINE1(enqueue_buffer_421, char *, data) {
 		return -1;
 	}
 	//Lock the mutex and decrease the empty_count
-	sem_wait(&mutex);
-	sem_wait(&empty_count);
+	down(&mutex);
+	down(&empty_count);
 	
 	//critical section
 	memcpy(buffer.write->data, data, DATA_LENGTH);
@@ -64,8 +64,8 @@ SYSCALL_DEFINE1(enqueue_buffer_421, char *, data) {
 	buffer.length++;
 	
 	//Add to the fill_count and release the mutex
-	sem_post(&fill_count);
-	sem_post(&mutex);
+	up(&fill_count);
+	up(&mutex);
 
 	return 0;
 }
@@ -79,8 +79,8 @@ SYSCALL_DEFINE1(dequeue_buffer_421, char *, data) {
 	}
 
 	//Here we lock the mutex and decrease the full count
-	sem_wait(&mutex);
-	sem_wait(&full_count);
+	down(&mutex);
+	down(&full_count);
 
 	
 	//Here we will Copy 1024 bytes from the read node 
@@ -92,8 +92,8 @@ SYSCALL_DEFINE1(dequeue_buffer_421, char *, data) {
 	buffer.legnth--;
 
 	//Add to the empty_count and release the mutex
-	sem_post(&empty_count);
-	sem_post(&mutex);
+	up(&empty_count);
+	up(&mutex);
 	return 0;
 }
 
