@@ -67,6 +67,28 @@ long enqueue_buffer_421(char * data) {
 
 long dequeue_buffer_421(char * data) {
 	// NOTE: Implement this function.
+	
+	if(!buffer.read){
+		printf("read_buffer_421(): The buffer does not exist. Aborting.\n")
+		return -1;
+	}
+
+	//Here we lock the mutex and decrease the full count
+	sem_wait(&mutex);
+	sem_wait(&full_count);
+
+	
+	//Here we will Copy 1024 bytes from the read node 
+        //into the provided buffer data.
+	memcpy(buffer.read->data, data, DATA_LENGTH);
+
+	//Advance the pointer
+	buffer.read = buffer.read->next;
+	buffer.legnth--;
+
+	//Add to the empty_count and release the mutex
+	sem_post(&empty_count);
+	sem_post(&mutex);
 	return 0;
 }
 
