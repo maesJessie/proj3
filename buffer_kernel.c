@@ -148,17 +148,3 @@ SYSCALL_DEFINE0(delete_buffer_421) {
 	return 0;
 }
 
-SYSCALL_DEFINE0(print_semaphores) {
-	// You can call this method to check the status of the semaphores.
-	// Don't forget to initialize them first!
-	// YOU DO NOT NEED TO IMPLEMENT THIS FOR KERNEL SPACE.
-	int value;
-	sem_getvalue(&mutex, &value);
-	printk("sem_t mutex = %d\n", value);
-	sem_getvalue(&fill_count, &value);
-	printk("sem_t fill_count = %d\n", value);
-	sem_getvalue(&empty_count, &value);
-	printk("sem_t empty_count = %d\n", value);
-	return;
-}
-
