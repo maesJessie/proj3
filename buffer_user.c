@@ -40,7 +40,7 @@ long init_buffer_421(void) {
 	// Initialize your semaphores here.
 	sem_init(&mutex, 0, 1);
 	sem_init(&fill_count, 0, SIZE_OF_BUFFER);
-	sem_init(&empty_count, 0, 0);
+	sem_init(&empty_count, 0, SIZE_OF_BUFFER);
 
 	return 0;
 }
@@ -52,8 +52,9 @@ long enqueue_buffer_421(char * data) {
 		return -1;
 	}
 	//Lock the mutex and decrease the empty_count
-	sem_wait(&mutex);
+	
 	sem_wait(&empty_count);
+	sem_wait(&mutex);
 	
 	//critical section
 	memcpy(buffer.write->data, data, DATA_LENGTH);
@@ -62,8 +63,9 @@ long enqueue_buffer_421(char * data) {
 	buffer.length++;
 	
 	//Add to the fill_count and release the mutex
-	sem_post(&fill_count);
 	sem_post(&mutex);
+	sem_post(&fill_count);
+	
 
 	return 0;
 }
@@ -77,9 +79,8 @@ long dequeue_buffer_421(char * data) {
 	}
 
 	//Here we lock the mutex and decrease the fill count
-	sem_wait(&mutex);
 	sem_wait(&fill_count);
-
+	sem_post(&mutex);
 	
 	//Here we will Copy 1024 bytes from the read node 
         //into the provided buffer data.
@@ -90,8 +91,8 @@ long dequeue_buffer_421(char * data) {
 	buffer.length--;
 
 	//Add to the empty_count and release the mutex
-	sem_post(&empty_count);
 	sem_post(&mutex);
+	sem_post(&empty_count);
 	return 0;
 }
 
