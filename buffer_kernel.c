@@ -54,6 +54,11 @@ SYSCALL_DEFINE1(enqueue_buffer_421, char *, data) {
 		printk("write_buffer_421(): The buffer does not exist. Aborting.\n");
 		return -1;
 	}
+	//If the buffer is full, do nothing
+	if(buffer.length >= SIZE_OF_BUFFER){
+		printk("write_buffer_421(): The buffer is full. Aborting.\n");
+		return -1;	
+	}
 	//Lock the mutex and decrease the empty_count
 	down(&empty_count);
 	down(&mutex);
@@ -78,7 +83,11 @@ SYSCALL_DEFINE1(dequeue_buffer_421, char *, data) {
 		printk("read_buffer_421(): The buffer does not exist. Aborting.\n");
 		return -1;
 	}
-
+	//If the buffer is empty, do nothing
+	if(buffer.length <= 0){
+		printf("write_buffer_421(): The buffer is empty. Aborting.\n");
+		return -1;	
+	}
 	//Here we lock the mutex and decrease the fill count
 	down(&fill_count);
 	down(&mutex);

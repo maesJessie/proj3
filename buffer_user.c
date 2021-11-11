@@ -51,6 +51,11 @@ long enqueue_buffer_421(char * data) {
 		printf("write_buffer_421(): The buffer does not exist. Aborting.\n");
 		return -1;
 	}
+		//If the buffer is full, do nothing
+	if(buffer.length >= SIZE_OF_BUFFER){
+		printf("write_buffer_421(): The buffer is full. Aborting.\n");
+		return -1;	
+	}
 	//Lock the mutex and decrease the empty_count
 	
 	sem_wait(&empty_count);
@@ -77,10 +82,14 @@ long dequeue_buffer_421(char * data) {
 		printf("read_buffer_421(): The buffer does not exist. Aborting.\n");
 		return -1;
 	}
-
+	//If the buffer is empty, do nothing
+	if(buffer.length <= 0){
+		printf("write_buffer_421(): The buffer is empty. Aborting.\n");
+		return -1;	
+	}
 	//Here we lock the mutex and decrease the fill count
 	sem_wait(&fill_count);
-	sem_post(&mutex);
+	sem_wait(&mutex);
 	
 	//Here we will Copy 1024 bytes from the read node 
         //into the provided buffer data.
