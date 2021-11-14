@@ -169,7 +169,131 @@ void consumer(void *thread){
 }
 
 int main(){
-	init_buffer_421();
-	pthread_t thread[DATA_LENGTH];
+	long rv;
+
+        printf("Here we test to see if our main program works.\n");
+
+        rv = init_buffer_421();
+
+        
+        pthread_t thread[DATA_LENGTH];
+
+
+        producer(thread);
+        
+        consumer(thread);
+
+        print_semaphores();
+
+        delete_buffer_421();
+
+	{
+                //Here we test to see if the dequeue function will return
+                //-1 on an empty buffer.
+                long rv;
+
+                
+                char value = '0';
+
+                printf("\nHere we are testing the dequeue function on an empty >
+
+                init_buffer_421();
+
+                pthread_t thread[DATA_LENGTH];
+
+                rv = dequeue_buffer_421(&value);
+
+                if(rv == -1)
+                        printf("The test was a success.\n\n");
+		       
+		else
+                        printf("The test was a failure.\n\n");
+
+                delete_buffer_421();
+
+        }//end of test case
+		   
+	{//Here we will test the dequeue function on an empty buffer
+                long rv;
+
+                char value = '0';
+
+                printf("Here we are testing the dequeue function on an unintial>
+        
+                pthread_t thread[DATA_LENGTH];
+
+                rv = dequeue_buffer_421(&value);
+
+                if(rv == -1)
+                        printf("The test was a success.\n\n");
+
+                else
+                        printf("The test was a failure.\n\n");
+
+
+        }//end of test case
+		   
+	{//Here we will test our enqueue function with a full buffer
+                long rv;
+
+                char value = '0';
+
+                printf("Here we test to the enqueue function on a full buffer.\>
+
+
+                init_buffer_421();
+
+        
+                pthread_t thread[DATA_LENGTH];
+
+
+                producer(thread);
+
+                //Calling enqueue again
+                rv = enqueue_buffer_421(&value);
+ 		if(rv == -1)
+                        printf("The test was a success.\n\n");
+
+                else
+                        printf("The test was a failure.\n\n");
+
+                delete_buffer_421();
+
+        }//end of test case
+		
+	{//Here we will test our enqueue function with an uninitialized buffer
+
+                long rv;
+
+                char value = '0';
+
+                printf("Here we test to the enqueue function on an uninitialize>
+
+
+
+                rv = enqueue_buffer_421(&value);
+
+                if(rv == -1)
+                        printf("The test was a success.\n\n");
+
+                else
+                        printf("The test was a failure.\n\n");
+
+        }//end of test case
+		       
+	{//Testing delete on an uninitialized buffer
+                printf("Here we will test to our delete function on an uninitia>
+
+                long rv;
+
+                rv = delete_buffer_421();
+
+                if(rv == -1)
+                        printf("The test was a success.\n\n");
+
+                else
+                        printf("The test was a failure.\n\n");
+        }//end of test case
+		       
 	return 0;
 }
