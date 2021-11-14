@@ -107,13 +107,13 @@ SYSCALL_DEFINE1(dequeue_buffer_421, const char __user *, data) {
 SYSCALL_DEFINE0(delete_buffer_421) {
 	// Tip: Don't call this while any process is waiting to enqueue or dequeue.
 	node_421_t *temp;
-	node_421_t *curr = buffer.read->next;
+	node_421_t *curr = buffer.read;
 	if (!buffer.read) {
 		printk("delete_buffer_421(): The buffer does not exist. Aborting.\n");
 		return -1;
 	}
 	// Get rid of all existing nodes.
-	while (curr != buffer.read) {
+	while (curr != buffer.write) {
 		temp = curr->next;
 		kfree(curr);
 		curr = temp;
