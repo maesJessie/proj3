@@ -37,14 +37,14 @@ SYSCALL_DEFINE0(init_buffer_421) {
 	buffer.length = 0;
 
 	// Initialize your semaphores here.
-	sema_init(&mutex, 0);
-	sema_init(&fill_count, 0);
-	sema_init(&empty_count, 0);
+	sema_init(&mutex, 1);
+	sema_init(&fill_count, SIZE_OF_BUFFER);
+	sema_init(&empty_count, SIZE_OF_BUFFER);
 
 	return 0;
 }
 
-SYSCALL_DEFINE1(enqueue_buffer_421, char *, data) {
+SYSCALL_DEFINE1(enqueue_buffer_421, const char __user *, data) {
 	// NOTE: You have to modify this function to use semaphores.
 	if (!buffer.write) {
 		printk("write_buffer_421(): The buffer does not exist. Aborting.\n");
@@ -56,8 +56,8 @@ SYSCALL_DEFINE1(enqueue_buffer_421, char *, data) {
 		return -1;
 	}
 	//Lock the mutex and decrease the empty_count
-	down(&empty_count);
 	down(&mutex);
+	down(&empty_count);
 
 	//critical section
 	memcpy(buffer.write->data, data, DATA_LENGTH);
@@ -66,13 +66,13 @@ SYSCALL_DEFINE1(enqueue_buffer_421, char *, data) {
 	buffer.length++;
 
 	//Add to the fill_count and release the mutex
-	up(&fill_count);
 	up(&mutex);
+	up(&fill_count);
 
 	return 0;
 }
 
-SYSCALL_DEFINE1(dequeue_buffer_421, char *, data) {
+SYSCALL_DEFINE1(dequeue_buffer_421, const char __user *, data) {
 	// NOTE: Implement this function.
 
 	if(!buffer.read){
@@ -85,8 +85,8 @@ SYSCALL_DEFINE1(dequeue_buffer_421, char *, data) {
 		return -1;
 	}
 	//Here we lock the mutex and decrease the fill count
-	down(&fill_count);
 	down(&mutex);
+	down(&fill_count);
 
 
 	//Here we will Copy 1024 bytes from the read node
@@ -98,37 +98,10 @@ SYSCALL_DEFINE1(dequeue_buffer_421, char *, data) {
 	buffer.length--;
 
 	//Add to the empty_count and release the mutex
-	up(&empty_count);
 	up(&mutex);
+	up(&empty_count);
 	return 0;
 }
-
-//SYSCALL_DEFINE1(producer, void *,thread){
-//	int i = 0;
-//	char value = '0';
-//	int count = 0;
-//	while(i < SIZE_OF_BUFFER){
-//		if(count > 9)
-//			count = 0;
-//		value = (char)count;
-//		usleep_range(0, 1);
-//		sys_enqueue_buffer_421(&value);
-//		i++;
-//		count++;
-//	}
-//	return 0;
-//}
-
-//SYSCALL_DEFINE1(consumer, void *,thread){
-//	int i = 0;
-//	char value = '0';
-//	while(i < SIZE_OF_BUFFER){
-//		usleep_range(0, 1);
-//		printk("%ld ", sys_dequeue_buffer_421(&value));
-//		i++;
-//	}
-//	return 0;
-//}
 
 
 SYSCALL_DEFINE0(delete_buffer_421) {
