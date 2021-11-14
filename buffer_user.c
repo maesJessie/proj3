@@ -186,6 +186,23 @@ int main(){
         print_semaphores();
 
         delete_buffer_421();
+	
+	{//here we will try to reinitialize the buffer after we initialize the buffer
+                long rv;
+
+                init_buffer_421();
+
+                rv = init_buffer_421();
+
+                if(rv == -1)
+                        printf("The test was a success.\n\n");
+
+                else
+                        printf("The test was a failure.\n\n");
+
+                delete_buffer_421();
+
+        }//end of test case
 
 	{
                 //Here we test to see if the dequeue function will return
