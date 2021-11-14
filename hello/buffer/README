@@ -1,0 +1,15 @@
+Author: Jessie Maes
+Description: Circular Buffer
+
+System Calls:
+	init_buffer_421:
+		Implemented by allocating memory for SIZE_OF_BUFFER nodes, linking them together, and filling each with 0 as their data. The very last node was then linked to the first one, completing the circle.
+	
+	insert_buffer_421:
+		Implemented by scrolling through each node, searching for one that holds the data 0 or the end of the list. If one with 0 as the data is found, the indicated integer is set as the new data value. If the end is reached, an error returns stating that the buffer is full.
+	
+	print_buffer_421:
+		Implemented by scrolling through the list and printing the data in each node to the kernel log.
+	
+	delete_buffer_421:
+		Implemented by scrolling through the list and freeing the memory one node at a time. Any dangling pointers are then set to NULL.
